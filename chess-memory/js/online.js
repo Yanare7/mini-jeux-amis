@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // MULTIJOUEUR EN LIGNE - Firebase Realtime Database
 //
 // Architecture : salons persistants, plusieurs parties dans
@@ -28,6 +28,13 @@ let onlineUnsubscribers = [];
 let salonSelectedDiff   = 'easy';
 let lastOnlineGameConfig = null;
 let isInGame            = false;
+
+// Refs DOM pour le panneau personnalise du salon
+var salonCustomDifficultyPanel = document.getElementById('salonCustomDifficultyPanel');
+var salonSamePiecesCheckbox    = document.getElementById('salonSamePiecesCheckbox');
+var salonSamePiecesPanel_      = document.getElementById('salonSamePiecesPanel');
+var salonPerRoundPiecesPanel_  = document.getElementById('salonPerRoundPiecesPanel');
+var salonCustomPiecesInput     = document.getElementById('salonCustomPiecesInput');
 
 // Nom de joueur : priorite a pendingPlayerName (sessionStorage) puis a la saisie
 function getAutoPlayerName() {
@@ -263,11 +270,63 @@ function startOnlineGame(isReplay) {
   });
 }
 
+function updateSalonDifficultyPanels() {
+  if (!salonCustomDifficultyPanel) return;
+  if (salonSelectedDiff === 'custom') {
+    salonCustomDifficultyPanel.classList.remove('hidden');
+    if (salonSamePiecesCheckbox.checked) {
+      salonSamePiecesPanel_.classList.remove('hidden');
+      salonPerRoundPiecesPanel_.classList.add('hidden');
+    } else {
+      salonSamePiecesPanel_.classList.add('hidden');
+      salonPerRoundPiecesPanel_.classList.remove('hidden');
+      renderSalonPerRoundInputs();
+    }
+  } else {
+    salonCustomDifficultyPanel.classList.add('hidden');
+  }
+}
+
+function renderSalonPerRoundInputs() {
+  if (!salonPerRoundPiecesPanel_) return;
+  salonPerRoundPiecesPanel_.innerHTML = '';
+  var n = parseInt(salonRoundsSelect.value, 10);
+  for (var i = 1; i <= n; i++) {
+    var row = document.createElement('div');
+    row.classList.add('per-round-row');
+    var label = document.createElement('label');
+    label.textContent = 'Manche ' + i;
+    var input = document.createElement('input');
+    input.type = 'number';
+    input.min  = '1';
+    input.max  = '16';
+    input.value = '4';
+    input.classList.add('per-round-input');
+    row.appendChild(label);
+    row.appendChild(input);
+    salonPerRoundPiecesPanel_.appendChild(row);
+  }
+}
+
 function computeOnlinePieceCounts(rounds, diff) {
   if (diff === 'easy')   return Array(rounds).fill(2);
   if (diff === 'medium') return Array(rounds).fill(6);
   if (diff === 'hard')   return Array(rounds).fill(9);
-  return Array(rounds).fill(4);
+  // custom
+  if (salonSamePiecesCheckbox && salonSamePiecesCheckbox.checked) {
+    var n = parseInt(salonCustomPiecesInput.value, 10);
+    n = Math.min(16, Math.max(1, isNaN(n) ? 4 : n));
+    return Array(rounds).fill(n);
+  }
+  var inputs = salonPerRoundPiecesPanel_
+    ? Array.from(salonPerRoundPiecesPanel_.querySelectorAll('.per-round-input'))
+    : [];
+  var counts = inputs.map(function(inp) {
+    var v = parseInt(inp.value, 10);
+    return Math.min(16, Math.max(1, isNaN(v) ? 4 : v));
+  });
+  while (counts.length < rounds) counts.push(4);
+  return counts.slice(0, rounds);
 }
 
 // ============================================================
@@ -784,7 +843,18 @@ salonDifficultyGrid.querySelectorAll('.difficulty-btn').forEach(function(btn) {
     salonDifficultyGrid.querySelectorAll('.difficulty-btn').forEach(function(b) {
       b.classList.toggle('active', b.dataset.difficulty === salonSelectedDiff);
     });
+    updateSalonDifficultyPanels();
   });
+});
+
+if (salonSamePiecesCheckbox) {
+  salonSamePiecesCheckbox.addEventListener('change', updateSalonDifficultyPanels);
+}
+
+salonRoundsSelect.addEventListener('change', function() {
+  if (salonSelectedDiff === 'custom' && salonSamePiecesCheckbox && !salonSamePiecesCheckbox.checked) {
+    renderSalonPerRoundInputs();
+  }
 });
 
 onlineReplayBtn.addEventListener('click', function() {
