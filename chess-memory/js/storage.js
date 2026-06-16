@@ -30,6 +30,7 @@ function collectPreferences() {
     showCoordinates: showCoordinates,
     samePieces: samePiecesCheckbox.checked,
     customPieces: customPiecesInput.value,
+    reserveMode: reserveMode,
     perRoundCounts: null
   };
 
@@ -81,6 +82,10 @@ function loadPreferences() {
 
   if (prefs.pieceSet && PIECE_SETS.some(set => set.id === prefs.pieceSet)) {
     pieceSet = prefs.pieceSet;
+  }
+
+  if (['all', 'exact'].includes(prefs.reserveMode)) {
+    reserveMode = prefs.reserveMode;
   }
 
   if (typeof prefs.samePieces === 'boolean') {

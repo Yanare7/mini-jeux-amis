@@ -6,6 +6,8 @@
   <title>Memoire d'echecs</title>
   <link rel="stylesheet" href="../shared/theme.css">
   <link rel="stylesheet" href="style.css">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png">
   <!-- SDK Firebase Realtime Database (compat : syntaxe firebase.database()) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -62,11 +64,16 @@
         <div id="playerNamesPanel"></div>
       </div>
 
-      <label for="roundsSelect">Nombre de manches</label>
-      <select id="roundsSelect"></select>
-
-      <label for="duration">Duree d'affichage (secondes)</label>
-      <select id="duration"></select>
+      <div class="two-col-row">
+        <div class="two-col-item">
+          <label for="roundsSelect">Manches</label>
+          <select id="roundsSelect"></select>
+        </div>
+        <div class="two-col-item">
+          <label for="duration">Duree (sec.)</label>
+          <select id="duration"></select>
+        </div>
+      </div>
 
       <span class="field-label">Difficulte</span>
       <div class="difficulty-grid" id="difficultyGrid">
@@ -89,9 +96,12 @@
       </div>
 
       <div id="customDifficultyPanel" class="hidden full-width">
-        <div class="checkbox-row">
-          <input type="checkbox" id="samePiecesCheckbox" checked>
-          <label for="samePiecesCheckbox">Meme nombre de pieces a chaque manche</label>
+        <div class="setting-row setting-row--compact">
+          <span>Meme nombre de pieces par manche</span>
+          <label class="switch">
+            <input type="checkbox" id="samePiecesCheckbox" checked>
+            <span class="slider"></span>
+          </label>
         </div>
 
         <div id="samePiecesPanel">
@@ -100,6 +110,22 @@
         </div>
 
         <div id="perRoundPiecesPanel" class="hidden"></div>
+      </div>
+
+      <div class="setting-row setting-row--compact">
+        <span>Afficher les coordonnees</span>
+        <label class="switch">
+          <input type="checkbox" id="coordsHomeToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row setting-row--compact">
+        <span>Toutes les pieces (pas seulement celles du plateau)</span>
+        <label class="switch">
+          <input type="checkbox" id="allPiecesToggle">
+          <span class="slider"></span>
+        </label>
       </div>
 
       <button id="playBtn" class="primary-btn">Commencer</button>
@@ -121,7 +147,7 @@
     <div class="menu-card">
       <button type="button" id="onlineBackBtn" class="back-link back-link--btn">&larr; Retour</button>
       <h1>Multijoueur en ligne</h1>
-      <p class="mode-subtitle">Entre ton prenom puis cree ou rejoins un salon</p>
+      <p class="mode-subtitle">Cree ou rejoins un salon</p>
 
       <label for="onlinePlayerNameInput">Ton prenom</label>
       <input type="text" id="onlinePlayerNameInput" placeholder="Ton prenom" autocomplete="off">
@@ -141,55 +167,73 @@
     </div>
   </div>
 
-  <!-- ECRAN SALLE D'ATTENTE ONLINE -->
-  <div class="screen hidden" id="onlineWaitScreen">
+  <!-- ECRAN SALON ONLINE (hub persistant : plusieurs parties, historique) -->
+  <div class="screen hidden" id="onlineSalonScreen">
     <div class="menu-card">
-      <button type="button" id="waitLeaveBtn" class="back-link back-link--btn">&larr; Quitter</button>
-      <h1>Salle d'attente</h1>
-
-      <!-- Code du salon -->
-      <div class="salon-code-display">
-        <span class="salon-code-label">Code du salon</span>
-        <span class="salon-code-value" id="onlineSalonCodeEl">------</span>
-        <button type="button" id="copySalonCodeBtn" class="small-btn">Copier</button>
-      </div>
-
-      <span class="field-label">Joueurs connectes</span>
-      <ul id="onlinePlayersList" class="online-players-list"></ul>
-
-      <!-- Panneau config : visible seulement pour l'hote -->
-      <div id="onlineConfigPanel" class="hidden full-width">
-        <span class="field-label">Parametres de la partie</span>
-
-        <label for="onlineRoundsSelect">Nombre de manches</label>
-        <select id="onlineRoundsSelect"></select>
-
-        <label for="onlineDurationSelect">Duree d'affichage (secondes)</label>
-        <select id="onlineDurationSelect"></select>
-
-        <span class="field-label">Difficulte</span>
-        <div class="difficulty-grid" id="onlineDifficultyGrid">
-          <button type="button" class="difficulty-btn active" data-difficulty="easy">
-            <span class="diff-title">Facile</span>
-            <span class="diff-desc">2 pieces</span>
-          </button>
-          <button type="button" class="difficulty-btn" data-difficulty="medium">
-            <span class="diff-title">Moyen</span>
-            <span class="diff-desc">6 pieces</span>
-          </button>
-          <button type="button" class="difficulty-btn" data-difficulty="hard">
-            <span class="diff-title">Difficile</span>
-            <span class="diff-desc">9 pieces</span>
-          </button>
-          <button type="button" class="difficulty-btn" data-difficulty="custom">
-            <span class="diff-title">Perso</span>
-            <span class="diff-desc">4 pieces</span>
-          </button>
+      <div class="card-topbar">
+        <button type="button" id="salonLeaveBtn" class="back-link back-link--btn">&larr; Quitter le salon</button>
+        <div class="salon-code-chip">
+          <span id="salonCodeDisplay">------</span>
+          <button type="button" id="salonCopyCodeBtn" class="icon-btn" title="Copier le code">&#10697;</button>
         </div>
       </div>
 
-      <button id="onlineStartBtn" class="primary-btn hidden" disabled>En attente...</button>
-      <p id="onlineWaitMsg" class="mode-subtitle">En attente que l'hote demarre la partie...</p>
+      <h1>Salon en ligne</h1>
+
+      <!-- Onglets Joueurs / Historique -->
+      <div class="salon-tabs" id="salonTabs">
+        <button type="button" class="salon-tab active" data-tab="lobby">Joueurs</button>
+        <button type="button" class="salon-tab" data-tab="history">Historique</button>
+      </div>
+
+      <!-- Onglet Joueurs -->
+      <div id="salonLobbyPane" class="full-width">
+        <ul id="salonPlayersList" class="online-players-list"></ul>
+
+        <!-- Config visible seulement pour l'hote -->
+        <div id="salonConfigPanel" class="hidden full-width">
+          <span class="field-label">Parametres</span>
+
+          <div class="two-col-row">
+            <div class="two-col-item">
+              <label for="salonRoundsSelect">Manches</label>
+              <select id="salonRoundsSelect"></select>
+            </div>
+            <div class="two-col-item">
+              <label for="salonDurationSelect">Duree (sec.)</label>
+              <select id="salonDurationSelect"></select>
+            </div>
+          </div>
+
+          <span class="field-label">Difficulte</span>
+          <div class="difficulty-grid" id="salonDifficultyGrid">
+            <button type="button" class="difficulty-btn active" data-difficulty="easy">
+              <span class="diff-title">Facile</span>
+              <span class="diff-desc">2 pieces</span>
+            </button>
+            <button type="button" class="difficulty-btn" data-difficulty="medium">
+              <span class="diff-title">Moyen</span>
+              <span class="diff-desc">6 pieces</span>
+            </button>
+            <button type="button" class="difficulty-btn" data-difficulty="hard">
+              <span class="diff-title">Difficile</span>
+              <span class="diff-desc">9 pieces</span>
+            </button>
+            <button type="button" class="difficulty-btn" data-difficulty="custom">
+              <span class="diff-title">Perso</span>
+              <span class="diff-desc">4 pieces</span>
+            </button>
+          </div>
+        </div>
+
+        <button id="salonStartBtn" class="primary-btn hidden" disabled>En attente...</button>
+        <p id="salonWaitMsg" class="mode-subtitle hidden">En attente que l'hote demarre la partie...</p>
+      </div>
+
+      <!-- Onglet Historique -->
+      <div id="salonHistoryPane" class="hidden full-width">
+        <div id="salonHistoryList"></div>
+      </div>
     </div>
   </div>
 
@@ -215,6 +259,9 @@
       <div class="controls hidden" id="checkControls">
         <button id="checkBtn" class="primary-btn">Verifier</button>
       </div>
+
+      <!-- Bouton quitter partie (mode online uniquement, visible via JS) -->
+      <button type="button" id="quitGameBtn" class="small-btn ghost-btn quit-game-btn hidden">&#8592; Quitter la partie</button>
 
       <div class="timer hidden" id="timer">
         <svg viewBox="0 0 100 100">
@@ -279,6 +326,15 @@
         </div>
       </div>
 
+      <!-- Boutons d'action apres partie en ligne (caches en mode solo/multi-local) -->
+      <div id="onlineResultsActions" class="hidden full-width">
+        <div class="online-results-row">
+          <button id="onlineReplayBtn" class="small-btn hidden">&#8635; Rejouer</button>
+          <button id="onlineBackToSalonBtn" class="small-btn">&#8592; Salon</button>
+          <button id="onlineLeaveSalonBtn" class="small-btn ghost-btn">Quitter</button>
+        </div>
+      </div>
+
       <button id="homeBtn" class="primary-btn">Retour a l'accueil</button>
     </div>
   </div>
@@ -313,7 +369,10 @@
         <button type="button" id="openPiecePickerBtn" class="small-btn">Changer les pieces</button>
       </div>
 
-      <button type="button" id="settingsDoneBtn" class="primary-btn">Fermer</button>
+      <div class="modal-actions">
+        <button type="button" id="settingsQuitBtn" class="small-btn ghost-btn">Quitter</button>
+        <button type="button" id="settingsSaveBtn" class="primary-btn">Sauvegarder</button>
+      </div>
     </div>
   </div>
 
@@ -337,6 +396,20 @@
       <div class="modal-actions">
         <button type="button" id="pieceCancelBtn" class="small-btn ghost-btn">Annuler</button>
         <button type="button" id="pieceValidateBtn" class="primary-btn">Valider</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE CONFIRMATION PERSONNALISEE -->
+  <div class="modal-overlay hidden" id="confirmModal">
+    <div class="modal-card modal-card--confirm">
+      <div class="modal-header">
+        <h2 id="confirmTitle">Confirmation</h2>
+      </div>
+      <p id="confirmMessage" class="mode-subtitle"></p>
+      <div class="modal-actions">
+        <button type="button" id="confirmCancelBtn" class="small-btn ghost-btn">Annuler</button>
+        <button type="button" id="confirmOkBtn" class="primary-btn">Confirmer</button>
       </div>
     </div>
   </div>

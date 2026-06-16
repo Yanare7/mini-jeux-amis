@@ -122,6 +122,20 @@ multiOnlineBtn.addEventListener('click', () => {
 });
 setupBackBtn.addEventListener('click', () => showScreen('modeScreen'));
 
+// --- Toggle coordonnees (homeScreen) ---
+coordsHomeToggle.addEventListener('change', () => {
+  showCoordinates = coordsHomeToggle.checked;
+  if (coordsToggle) coordsToggle.checked = showCoordinates;
+  applyCoordinates();
+  savePreferences();
+});
+
+// --- Mode de reserve (toggle Toutes / Du plateau) ---
+allPiecesToggle.addEventListener('change', () => {
+  reserveMode = allPiecesToggle.checked ? 'all' : 'exact';
+  savePreferences();
+});
+
 // --- Lancement d'une partie ---
 
 // Calcule le nombre de pieces de chaque manche selon la difficulte choisie

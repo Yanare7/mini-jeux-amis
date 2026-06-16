@@ -31,6 +31,7 @@ let totalRounds = 5;
 let pieceCounts = [];
 let playerName = '';
 let selectedDifficulty = 'easy'; // 'easy' | 'medium' | 'hard' | 'custom'
+let reserveMode = 'exact';       // 'all' | 'exact' | 'sorted'
 
 // --- Mode de jeu et multijoueur local ---
 let gameMode = 'solo';        // 'solo' | 'multi'

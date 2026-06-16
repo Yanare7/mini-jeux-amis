@@ -20,24 +20,69 @@ const soloBtn = document.getElementById('soloBtn');
 const multiLocalBtn = document.getElementById('multiLocalBtn');
 const multiOnlineBtn = document.getElementById('multiOnlineBtn');
 
-// --- Ecrans online ---
-const onlineBackBtn = document.getElementById('onlineBackBtn');
+// --- Ecran lobby online ---
+const onlineBackBtn         = document.getElementById('onlineBackBtn');
 const onlinePlayerNameInput = document.getElementById('onlinePlayerNameInput');
-const createSalonBtn = document.getElementById('createSalonBtn');
-const salonCodeInput = document.getElementById('salonCodeInput');
-const joinSalonBtn = document.getElementById('joinSalonBtn');
-const onlineLobbyError = document.getElementById('onlineLobbyError');
-const onlineSalonCodeEl = document.getElementById('onlineSalonCodeEl');
-const copySalonCodeBtn = document.getElementById('copySalonCodeBtn');
-const onlinePlayersList = document.getElementById('onlinePlayersList');
-const onlineConfigPanel = document.getElementById('onlineConfigPanel');
-const onlineRoundsSelect = document.getElementById('onlineRoundsSelect');
-const onlineDurationSelect = document.getElementById('onlineDurationSelect');
-const onlineDifficultyGrid = document.getElementById('onlineDifficultyGrid');
-const onlineStartBtn = document.getElementById('onlineStartBtn');
-const onlineWaitMsg = document.getElementById('onlineWaitMsg');
-const waitLeaveBtn = document.getElementById('waitLeaveBtn');
+const createSalonBtn        = document.getElementById('createSalonBtn');
+const salonCodeInput        = document.getElementById('salonCodeInput');
+const joinSalonBtn          = document.getElementById('joinSalonBtn');
+const onlineLobbyError      = document.getElementById('onlineLobbyError');
+
+// --- Ecran salon persistant ---
+const salonLeaveBtn      = document.getElementById('salonLeaveBtn');
+const salonCopyCodeBtn   = document.getElementById('salonCopyCodeBtn');
+const salonCodeDisplay   = document.getElementById('salonCodeDisplay');
+const salonPlayersList   = document.getElementById('salonPlayersList');
+const salonConfigPanel   = document.getElementById('salonConfigPanel');
+const salonRoundsSelect  = document.getElementById('salonRoundsSelect');
+const salonDurationSelect = document.getElementById('salonDurationSelect');
+const salonDifficultyGrid = document.getElementById('salonDifficultyGrid');
+const salonStartBtn      = document.getElementById('salonStartBtn');
+const salonWaitMsg       = document.getElementById('salonWaitMsg');
+const salonTabs          = document.getElementById('salonTabs');
+const salonLobbyPane     = document.getElementById('salonLobbyPane');
+const salonHistoryPane   = document.getElementById('salonHistoryPane');
+const salonHistoryList   = document.getElementById('salonHistoryList');
+
+// --- Ecran attente fin de partie ---
 const onlineFinishedCount = document.getElementById('onlineFinishedCount');
+
+// --- Boutons resultats online ---
+const onlineResultsActions  = document.getElementById('onlineResultsActions');
+const onlineReplayBtn       = document.getElementById('onlineReplayBtn');
+const onlineBackToSalonBtn  = document.getElementById('onlineBackToSalonBtn');
+const onlineLeaveSalonBtn   = document.getElementById('onlineLeaveSalonBtn');
+
+// --- Modale de confirmation personnalisee ---
+const confirmModal     = document.getElementById('confirmModal');
+const confirmTitle     = document.getElementById('confirmTitle');
+const confirmMessage   = document.getElementById('confirmMessage');
+const confirmOkBtn     = document.getElementById('confirmOkBtn');
+const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+
+// Affiche la modale de confirmation avec un message et un callback
+function showConfirmModal(message, onConfirm, options) {
+  options = options || {};
+  confirmTitle.textContent   = options.title      || 'Confirmation';
+  confirmMessage.textContent = message;
+  confirmOkBtn.textContent   = options.okText     || 'Confirmer';
+  confirmCancelBtn.textContent = options.cancelText || 'Annuler';
+  confirmModal.classList.remove('hidden');
+
+  function cleanup() {
+    confirmModal.classList.add('hidden');
+    confirmOkBtn.removeEventListener('click', onOk);
+    confirmCancelBtn.removeEventListener('click', onCancel);
+    confirmModal.removeEventListener('click', onOverlay);
+  }
+  function onOk()      { cleanup(); onConfirm(); }
+  function onCancel()  { cleanup(); if (options.onCancel) options.onCancel(); }
+  function onOverlay(e) { if (e.target === confirmModal) { cleanup(); if (options.onCancel) options.onCancel(); } }
+
+  confirmOkBtn.addEventListener('click', onOk);
+  confirmCancelBtn.addEventListener('click', onCancel);
+  confirmModal.addEventListener('click', onOverlay);
+}
 
 // --- Menu / configuration (accueil) ---
 const setupBackBtn = document.getElementById('setupBackBtn');
@@ -56,6 +101,11 @@ const samePiecesPanel = document.getElementById('samePiecesPanel');
 const customPiecesInput = document.getElementById('customPiecesInput');
 const perRoundPiecesPanel = document.getElementById('perRoundPiecesPanel');
 const playBtn = document.getElementById('playBtn');
+const coordsHomeToggle = document.getElementById('coordsHomeToggle');
+const allPiecesToggle  = document.getElementById('allPiecesToggle');
+
+// --- Ecran jeu (bouton quitter partie online) ---
+const quitGameBtn = document.getElementById('quitGameBtn');
 
 // --- Ecran passage (multijoueur) ---
 const passTitle = document.getElementById('passTitle');
@@ -65,7 +115,8 @@ const passContinueBtn = document.getElementById('passContinueBtn');
 // --- Modale parametres ---
 const settingsModal = document.getElementById('settingsModal');
 const settingsCloseBtn = document.getElementById('settingsCloseBtn');
-const settingsDoneBtn = document.getElementById('settingsDoneBtn');
+const settingsSaveBtn = document.getElementById('settingsSaveBtn');
+const settingsQuitBtn = document.getElementById('settingsQuitBtn');
 const themeToggle = document.getElementById('themeToggle');
 const coordsToggle = document.getElementById('coordsToggle');
 const kingsPreview = document.getElementById('kingsPreview');

@@ -51,7 +51,7 @@
 .back-link:hover {
   color: #00e5ff;
 }
-.menu-card label {
+.menu-card label:not(.switch) {
   width: 100%;
   font-size: 14px;
   color: #c5c5e0;
@@ -965,5 +965,279 @@ body.light-theme .online-divider::after {
   background: rgba(0, 0, 0, 0.1);
 }
 body.light-theme .salon-code-label {
+  color: #6a6a8a;
+}
+
+/* Bouton quitter partie en cours (mode online) */
+.quit-game-btn {
+  margin-bottom: 4px;
+  align-self: flex-start;
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+/* Bouton revoir dans historique */
+.history-review-btn {
+  margin-top: 8px;
+  width: 100%;
+  font-size: 12px;
+  padding: 6px;
+}
+
+/* Bouton expulser un joueur */
+.kick-btn {
+  background: rgba(255, 80, 80, 0.1);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  color: #ff6b6b;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.15s;
+}
+.kick-btn:hover {
+  background: rgba(255, 80, 80, 0.25);
+}
+
+/* Puce code dans la topbar */
+.salon-code-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 10px;
+  padding: 4px 10px;
+}
+#salonCodeDisplay {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: #00e5ff;
+}
+
+/* Onglets Joueurs / Historique */
+.salon-tabs {
+  width: 100%;
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 4px;
+  margin-top: 2px;
+}
+.salon-tab {
+  flex: 1;
+  padding: 7px;
+  border-radius: 7px;
+  border: none;
+  background: none;
+  color: #9a9ac0;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.salon-tab:hover {
+  color: #e8e8f0;
+}
+.salon-tab.active {
+  background: rgba(0, 229, 255, 0.15);
+  color: #00e5ff;
+}
+
+/* Badge joueur absent */
+.player-badges {
+  display: flex;
+  gap: 4px;
+}
+.offline-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9a9ac0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+.player-offline {
+  opacity: 0.55;
+}
+
+/* ============================================================
+   MISE EN PAGE DEUX COLONNES (manches + duree)
+   ============================================================ */
+.two-col-row {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+}
+.two-col-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.two-col-item label {
+  margin-top: 0.2rem;
+}
+
+/* Toggle compact sur une seule ligne (homeScreen) */
+.setting-row--compact {
+  padding: 6px 0;
+  border-bottom: none;
+}
+
+/* Controle segmente (mode de reserve) */
+.seg-control {
+  width: 100%;
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 4px;
+  margin-top: 4px;
+}
+.seg-btn {
+  flex: 1;
+  padding: 7px 4px;
+  border-radius: 7px;
+  border: none;
+  background: none;
+  color: #9a9ac0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.seg-btn:hover {
+  color: #e8e8f0;
+}
+.seg-btn.active {
+  background: rgba(0, 229, 255, 0.15);
+  color: #00e5ff;
+}
+
+/* Modale de confirmation (plus petite) */
+.modal-card--confirm {
+  width: min(340px, 90vw);
+  gap: 0.5rem;
+}
+.modal-card--confirm .modal-actions {
+  margin-top: 0.25rem;
+}
+.modal-card--confirm .modal-actions .primary-btn {
+  margin-top: 0;
+}
+
+/* Theme clair : seg-control et two-col */
+body.light-theme .seg-control {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+body.light-theme .seg-btn {
+  color: #6a6a8a;
+}
+body.light-theme .seg-btn:hover {
+  color: #25243a;
+}
+body.light-theme .seg-btn.active {
+  background: rgba(0, 184, 212, 0.15);
+  color: #00838f;
+}
+
+/* ============================================================
+   HISTORIQUE DES PARTIES
+   ============================================================ */
+.history-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.history-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.history-diff {
+  font-size: 12px;
+  font-weight: 700;
+  color: #c5c5e0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.history-time {
+  font-size: 12px;
+  color: #9a9ac0;
+}
+.history-score-row {
+  font-size: 13px;
+  color: #e8e8f0;
+  padding: 2px 0;
+}
+.history-winner {
+  color: #ffd54f;
+  font-weight: 700;
+}
+
+/* ============================================================
+   BOUTONS D'ACTION APRES PARTIE EN LIGNE
+   ============================================================ */
+.online-results-row {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.online-results-row .small-btn {
+  flex: 1;
+}
+
+/* ============================================================
+   SURCHARGES THEME CLAIR : nouveaux composants salon
+   ============================================================ */
+body.light-theme .salon-code-chip {
+  background: rgba(0, 184, 212, 0.08);
+  border-color: rgba(0, 184, 212, 0.25);
+}
+body.light-theme #salonCodeDisplay {
+  color: #00838f;
+}
+body.light-theme .salon-tabs {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+body.light-theme .salon-tab {
+  color: #6a6a8a;
+}
+body.light-theme .salon-tab.active {
+  background: rgba(0, 184, 212, 0.12);
+  color: #00838f;
+}
+body.light-theme .history-card {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+body.light-theme .history-diff {
+  color: #4a4a66;
+}
+body.light-theme .history-score-row {
+  color: #25243a;
+}
+body.light-theme .offline-badge {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
   color: #6a6a8a;
 }

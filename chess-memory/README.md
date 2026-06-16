@@ -1,6 +1,163 @@
-# Chess Memory
+# Chess Memory — Mémoire d'échecs
 
-Jeu de mémoire basé sur l'échiquier: observe une position pendant quelques secondes, puis replace les pièces au bon endroit.
+Jeu de mémoire basé sur l'échiquier : observe une position pendant quelques secondes, puis replace les pièces au bon endroit.
+
+## Modes de jeu
+
+| Mode | Description |
+|---|---|
+| **Solo** | Un seul joueur, bats ton record |
+| **Multijoueur local** | Plusieurs joueurs à tour de rôle sur le même appareil (passe-passe) |
+| **Multijoueur en ligne** | Jusqu'à 8 joueurs sur leurs propres appareils, via Firebase |
+
+## Fonctionnalités
+
+### Partie
+- Nombre de manches configurable (1 à 20).
+- Durée d'affichage configurable (1 à 60 secondes).
+- Difficultés prédéfinies : Facile (2 pièces), Moyen (6), Difficile (9).
+- Mode personnalisé : même nombre de pièces toutes les manches, ou nombre différent par manche.
+- Interaction en **clic** et **glisser-déposer** (desktop + mobile).
+- Minuteur circulaire animé.
+- Toutes les positions partagées en multijoueur (équité garantie).
+
+### Interface
+- **35 styles de pièces** sélectionnables via une modale avec aperçu échiquier.
+- **Thème clair/sombre** (interrupteur dans les paramètres).
+- **Affichage des coordonnées** a–h / 1–8 (activable/désactivable).
+- Sauvegarde des préférences en `localStorage`.
+
+### Résultats
+- Score par manche + score total.
+- Révision manche par manche (ta réponse vs la solution).
+- En multijoueur : classement avec médaille, onglets par joueur.
+
+### Multijoueur en ligne (salon)
+- Création d'un salon avec code à 6 caractères.
+- Rejoint depuis n'importe quel appareil (iPhone, Android, PC).
+- L'hôte configure la partie et peut **expulser** un joueur.
+- Les joueurs jouent en simultané, chacun sur son appareil.
+- **Historique des parties** du salon (20 dernières) avec bouton "Revoir".
+- Salon persistant : plusieurs parties sans recréer de salon.
+- Expiration automatique après **1 heure d'inactivité**.
+- Suppression automatique quand **tout le monde a quitté**.
+- Transfert automatique de l'hôte si celui-ci quitte.
+
+## Comment jouer
+
+1. Choisir un mode sur l'écran d'accueil.
+2. Configurer la partie (manches, durée, difficulté).
+3. Cliquer **Commencer**.
+4. **Mémoriser** la position pendant le décompte.
+5. **Replacer** les pièces depuis la réserve.
+6. Cliquer **Vérifier**.
+7. Manche suivante ou résultats finaux.
+
+## Règles de score
+
+Une pièce est correcte si les 3 conditions sont remplies simultanément :
+- bonne case,
+- bon type (roi, dame, tour…),
+- bonne couleur (blanc/noir).
+
+```text
+Score manche = pièces correctes
+Score total  = Σ scores des manches
+Score max    = Σ pièces attendues par manche
+```
+
+## Flux d'une manche
+
+```mermaid
+flowchart LR
+    A[Position aléatoire générée] --> B[Affichage + minuteur]
+    B --> C[Position masquée]
+    C --> D[Placement joueur]
+    D --> E[Vérification]
+    E --> F{Dernière manche ?}
+    F -- Non --> A
+    F -- Oui --> G[Résultats + révision]
+```
+
+## Architecture du code
+
+JavaScript vanilla, espace global partagé, scripts chargés dans l'ordre déclaré dans `index.html`.
+
+**Ordre de chargement :**
+
+| Fichier | Rôle |
+|---|---|
+| `config.js` | Constantes (sets de pièces, timer, seuils) |
+| `state.js` | Variables mutables globales (manche, score, joueurs…) |
+| `logic.js` | Fonctions pures (génération, mélange, comparaison) |
+| `dom.js` | Références DOM + helpers (`showScreen`, `populateSelect`, `applyTheme`…) |
+| `board.js` | Rendu échiquier et pièces |
+| `dragdrop.js` | Interactions clic + glisser-déposer (desktop + touch) |
+| `storage.js` | Persistance préférences en `localStorage` |
+| `online.js` | Multijoueur en ligne (Firebase Realtime Database) |
+| `settings.js` | Modale paramètres (thème, coordonnées, choix des pièces) |
+| `menu.js` | Écran configuration + lancement de partie |
+| `game.js` | Boucle des manches, timer, vérification |
+| `results.js` | Écran résultats, classement, révision |
+| `main.js` | Initialisation globale (dernier chargé) |
+
+## Arborescence
+
+```text
+chess-memory/
+├── index.html
+├── style.css
+├── favicon.png          ← à placer ici (PNG 32×32 ou 64×64)
+├── README.md
+├── js/
+│   ├── config.js
+│   ├── state.js
+│   ├── logic.js
+│   ├── dom.js
+│   ├── board.js
+│   ├── dragdrop.js
+│   ├── storage.js
+│   ├── online.js
+│   ├── settings.js
+│   ├── menu.js
+│   ├── game.js
+│   ├── results.js
+│   └── main.js
+└── pieces/
+    ├── neo/             ← set par défaut
+    ├── classic/
+    ├── alpha/
+    └── ...              ← 35 sets au total
+```
+
+## Lancer le jeu en local
+
+Depuis le dossier parent `mini-jeux-amis` :
+
+```bash
+python -m http.server 8000
+```
+
+Ouvrir : `http://localhost:8000/chess-memory/`
+
+## Ajouter un set de pièces
+
+1. Créer `pieces/<id>/`.
+2. Placer les 12 images : `wk.png` `wq.png` `wr.png` `wb.png` `wn.png` `wp.png` / `bk.png` `bq.png` `br.png` `bb.png` `bn.png` `bp.png`.
+3. Déclarer le set dans `js/config.js` → tableau `PIECE_SETS` : `{ id: '<id>', label: 'Nom affiché' }`.
+
+**Spécifications images :** PNG transparent, généralement 100×100 ou 128×128 px.
+
+### Sets disponibles (35)
+
+`neo` · `classic` · `alpha` · `book` · `club` · `condal` · `dash` · `game_room` · `glass` · `gothic` · `icy_sea` · `light` · `lolz` · `marble` · `maya` · `metal` · `modern` · `nature` · `neo_wood` · `neon` · `newspaper` · `ocean` · `sky` · `space` · `tigers` · `tournament` · `vintage` · `wood` · `8_bit` · `bubblegum` · `graffiti` · `3d_chesskid` · `3d_plastic` · `3d_staunton` · `3d_wood`
+
+## Crédits
+
+- Développé en JavaScript vanilla, sans framework.
+- Sets de pièces : [GiorgioMegrelli/chess.com-boards-and-pieces](https://github.com/GiorgioMegrelli/chess.com-boards-and-pieces)
+- Multijoueur : [Firebase Realtime Database](https://firebase.google.com) (plan gratuit Spark)
+
 
 ## Objectif
 

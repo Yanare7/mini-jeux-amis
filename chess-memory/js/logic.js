@@ -73,3 +73,23 @@ function getInitialPosition() {
   }
   return positions;
 }
+
+// Construit une reserve avec toutes les 32 pieces standard (mode "Toutes les pieces")
+function buildFullReserve() {
+  const backRank = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
+  const pieces = [];
+  ['white', 'black'].forEach(color => {
+    backRank.forEach(type => pieces.push({ type, color }));
+    for (let i = 0; i < 8; i++) pieces.push({ type: 'pawn', color });
+  });
+  return shuffle(pieces);
+}
+
+// Trie les pieces d'une reserve par type puis couleur (mode "Triees")
+const PIECE_TYPE_ORDER = { king: 0, queen: 1, rook: 2, bishop: 3, knight: 4, pawn: 5 };
+function buildSortedReserve(pieces) {
+  return [...pieces].sort((a, b) => {
+    const t = (PIECE_TYPE_ORDER[a.type] ?? 99) - (PIECE_TYPE_ORDER[b.type] ?? 99);
+    return t !== 0 ? t : a.color.localeCompare(b.color);
+  });
+}

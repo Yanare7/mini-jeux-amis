@@ -55,6 +55,8 @@ function startPlayerTurn() {
   totalScore = 0;
   totalPossible = 0;
   roundResults = [];
+  // Affiche le bouton "Quitter la partie" uniquement en mode online
+  if (quitGameBtn) quitGameBtn.classList.toggle('hidden', gameMode !== 'online');
   showScreen('gameScreen');
   startRound();
 }
@@ -118,9 +120,15 @@ function runTimer(duration) {
   timerAnimationId = requestAnimationFrame(tick);
 }
 
-// Cache la position et prepare la reserve : le joueur peut maintenant jouer
+// Cache la position et prepare la reserve selon le mode choisi
 function startPlacementPhase() {
-  reservePieces = shuffle(originalPosition.map(p => ({ type: p.type, color: p.color })));
+  if (reserveMode === 'all') {
+    reservePieces = buildFullReserve();
+  } else if (reserveMode === 'sorted') {
+    reservePieces = buildSortedReserve(originalPosition.map(p => ({ type: p.type, color: p.color })));
+  } else {
+    reservePieces = shuffle(originalPosition.map(p => ({ type: p.type, color: p.color })));
+  }
   boardPlacements = {};
   selectedIndex = null;
   placementActive = true;

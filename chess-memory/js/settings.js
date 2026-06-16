@@ -8,10 +8,12 @@
 // ============================================================
 
 // Set de pieces "en attente" pendant qu'on choisit dans la modale
-// (on ne change "pieceSet" pour de vrai qu'au moment de valider)
+// (on ne change "pieceSet" pour de vrai qu'au moment de valider dans les parametres)
 let pendingPieceSet = DEFAULT_PIECE_SET;
+// Set de pieces au moment de l'ouverture des parametres (pour detecter les changements)
+let settingsPieceOnOpen = DEFAULT_PIECE_SET;
 
-// --- Apercu compact : roi noir + roi blanc du set actuel ---
+// --- Apercu compact : roi noir + roi blanc du set en attente ---
 function renderKingsPreview() {
   kingsPreview.innerHTML = '';
   [{ type: 'king', color: 'black' }, { type: 'king', color: 'white' }].forEach(piece => {
@@ -19,7 +21,7 @@ function renderKingsPreview() {
     cell.classList.add('king-cell');
     const img = document.createElement('img');
     img.classList.add('piece-img');
-    img.src = getPieceImageSrcForSet(piece, pieceSet);
+    img.src = getPieceImageSrcForSet(piece, pendingPieceSet);
     img.alt = piece.color + ' king';
     img.draggable = false;
     cell.appendChild(img);
@@ -29,6 +31,8 @@ function renderKingsPreview() {
 
 // --- Modale parametres ---
 function openSettings() {
+  settingsPieceOnOpen = pieceSet;
+  pendingPieceSet = pieceSet;
   themeToggle.checked = (theme === 'light');
   coordsToggle.checked = showCoordinates;
   renderKingsPreview();
@@ -36,6 +40,42 @@ function openSettings() {
 }
 function closeSettings() {
   settingsModal.classList.add('hidden');
+}
+// Annule toutes les modifications en cours et ferme les parametres
+function cancelSettings() {
+  themeToggle.checked = (theme === 'light');
+  coordsToggle.checked = showCoordinates;
+  pendingPieceSet = pieceSet;
+  renderKingsPreview();
+  closeSettings();
+}
+// Sauvegarde toutes les modifications et ferme les parametres
+function saveSettings() {
+  theme = themeToggle.checked ? 'light' : 'dark';
+  showCoordinates = coordsToggle.checked;
+  pieceSet = pendingPieceSet;
+  applyTheme();
+  applyCoordinates();
+  if (coordsHomeToggle) coordsHomeToggle.checked = showCoordinates;
+  savePreferences();
+  renderKingsPreview();
+  closeSettings();
+}
+// Quitter les parametres : demande confirmation si des modifications non sauvegardees
+function tryQuitSettings() {
+  var pendingThemeVal = themeToggle.checked ? 'light' : 'dark';
+  var hasChanges = pendingPieceSet !== pieceSet
+    || pendingThemeVal !== theme
+    || coordsToggle.checked !== showCoordinates;
+  if (hasChanges) {
+    showConfirmModal(
+      'Quitter sans sauvegarder les modifications ?',
+      cancelSettings,
+      { title: 'Modifications non sauvegardees', okText: 'Quitter', cancelText: 'Rester' }
+    );
+  } else {
+    cancelSettings();
+  }
 }
 
 // --- Modale choix des pieces ---
@@ -105,30 +145,27 @@ function closePiecePicker() {
   pieceModal.classList.add('hidden');
 }
 function validatePiecePicker() {
-  pieceSet = pendingPieceSet;
-  savePreferences();
+  // On met juste a jour pendingPieceSet et l'apercu dans les parametres.
+  // La sauvegarde definitive se fait via le bouton "Sauvegarder" des parametres.
   renderKingsPreview();
   closePiecePicker();
 }
 
 // --- Branchements ---
 settingsBtn.addEventListener('click', openSettings);
-settingsCloseBtn.addEventListener('click', closeSettings);
-settingsDoneBtn.addEventListener('click', closeSettings);
+settingsCloseBtn.addEventListener('click', tryQuitSettings);
+settingsSaveBtn.addEventListener('click', saveSettings);
+settingsQuitBtn.addEventListener('click', tryQuitSettings);
 settingsModal.addEventListener('click', (e) => {
-  if (e.target === settingsModal) closeSettings();
+  if (e.target === settingsModal) tryQuitSettings();
 });
 
 themeToggle.addEventListener('change', () => {
-  theme = themeToggle.checked ? 'light' : 'dark';
-  applyTheme();
-  savePreferences();
+  // Ne s'applique qu'a la sauvegarde (pas de preview live)
 });
 
 coordsToggle.addEventListener('change', () => {
-  showCoordinates = coordsToggle.checked;
-  applyCoordinates();
-  savePreferences();
+  // Ne s'applique qu'a la sauvegarde (pas de preview live)
 });
 
 openPiecePickerBtn.addEventListener('click', openPiecePicker);
