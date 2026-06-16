@@ -1,0 +1,121 @@
+/* ============================================================
+   PAGE D'ACCUEIL - mini-jeux-amis
+   ============================================================
+   Le theme commun (fond, orbes, .hidden) est dans
+   shared/theme.css, charge avant ce fichier.
+   ============================================================ */
+
+.page {
+  width: min(700px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.page h1 {
+  text-align: center;
+  margin: 0.5rem 0 0.25rem;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, #00e5ff, #b388ff, #ff4ecb);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  text-align: center;
+  color: #c5c5e0;
+  font-size: 14px;
+  margin: 0 0 1.5rem;
+}
+
+/* Grille des jeux : carre, et qui s'adapte au nombre de jeux/largeur d'ecran */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Une carte = un jeu */
+.game-card {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  text-decoration: none;
+  color: #e8e8f0;
+
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* Effet au survol (uniquement sur les jeux jouables, donc les <a>) */
+a.game-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(0, 229, 255, 0.5);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 24px rgba(0, 229, 255, 0.25);
+}
+a.game-card:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+.game-title {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Vignette generique : prend toute la largeur de la carte, coins arrondis */
+.game-thumb {
+  width: 100%;
+  flex: 1;
+  border-radius: 10px;
+}
+
+/* Vignette "Memoire d'echecs" : un damier dessine en CSS pur
+   (repeating-conic-gradient cree un motif 2x2 ; avec un
+   background-size de 25% x 25%, ce motif se repete 4x4 fois,
+   ce qui donne un damier 8x8 -- comme un vrai echiquier). */
+.game-thumb--chess {
+  background-color: #f0d9b5;
+  background-image: repeating-conic-gradient(
+    #b58863 0% 25%,
+    #f0d9b5 0% 50%
+  );
+  background-size: 25% 25%;
+  border: 2px solid #3a2a1a;
+}
+
+/* Vignette des jeux "a venir" */
+.game-thumb--soon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #6a6a8a;
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+}
+
+/* Carte d'un jeu pas encore disponible : grisee, pas d'effet au survol */
+.game-card--soon {
+  opacity: 0.5;
+  cursor: default;
+}
+.game-card--soon .game-title {
+  color: #9a9ac0;
+}
