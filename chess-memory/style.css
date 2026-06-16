@@ -1,0 +1,969 @@
+/* ============================================================
+   STYLES SPECIFIQUES AU JEU "Memoire d'echecs"
+   ============================================================
+   Le theme commun (fond, orbes, reinitialisation de base, .hidden)
+   est dans ../shared/theme.css, charge avant ce fichier.
+   ============================================================ */
+
+.screen {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Carte "verre depoli" commune aux trois ecrans */
+.menu-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 1.25rem;
+  width: min(440px, 94vw);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.menu-card h1 {
+  text-align: center;
+  margin: 0 0 0.5rem;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, #00e5ff, #b388ff, #ff4ecb);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Lien de retour vers la page d'accueil du site */
+.back-link {
+  align-self: flex-start;
+  color: #9a9ac0;
+  font-size: 13px;
+  text-decoration: none;
+  margin-bottom: 0.25rem;
+}
+.back-link:hover {
+  color: #00e5ff;
+}
+.menu-card label {
+  width: 100%;
+  font-size: 14px;
+  color: #c5c5e0;
+  font-weight: 600;
+  margin-top: 0.4rem;
+}
+.menu-card input[type="text"],
+.menu-card input[type="number"],
+.menu-card select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e8e8f0;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.menu-card input:focus,
+.menu-card select:focus {
+  border-color: #00e5ff;
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.25);
+}
+.menu-card select option {
+  background: #1a1a40;
+  color: #e8e8f0;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #c5c5e0;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+.checkbox-row input {
+  width: auto;
+}
+.checkbox-row label {
+  width: auto;
+  margin: 0;
+  font-weight: normal;
+}
+
+#customDifficultyPanel,
+#samePiecesPanel,
+#perRoundPiecesPanel {
+  width: 100%;
+}
+
+.per-round-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+.per-round-row label {
+  margin: 0;
+  font-weight: normal;
+  width: auto;
+}
+.per-round-row input {
+  width: 70px;
+}
+
+/* Boutons */
+.primary-btn {
+  background: linear-gradient(90deg, #00b8d4, #7c4dff);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s;
+  margin-top: 0.75rem;
+  width: 100%;
+  box-shadow: 0 4px 14px rgba(124, 77, 255, 0.35);
+}
+.primary-btn:hover {
+  box-shadow: 0 6px 22px rgba(0, 229, 255, 0.5);
+  transform: translateY(-2px);
+}
+.primary-btn:active {
+  transform: scale(0.97) translateY(0);
+}
+
+.small-btn {
+  background: linear-gradient(90deg, #00b8d4, #7c4dff);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+.small-btn:hover {
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 0.25rem;
+}
+
+#roundInfo {
+  font-weight: 600;
+  font-size: 15px;
+  text-align: center;
+  margin-bottom: 0.25rem;
+  color: #e8e8f0;
+}
+
+/* Minuteur circulaire */
+.timer {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  margin-bottom: 0.25rem;
+}
+.timer svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.timer circle {
+  fill: none;
+  stroke-width: 8;
+}
+.timer-track {
+  stroke: rgba(255, 255, 255, 0.15);
+}
+.timer-progress {
+  stroke: #00e5ff;
+  stroke-linecap: round;
+  /* Pas de "transition" ici : le cercle est mis a jour a chaque image
+     par requestAnimationFrame (cf. js/game.js), donc il suit le temps
+     reel sans decalage. Une transition CSS en plus introduirait un
+     retard. */
+}
+.timer-value {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: bold;
+  color: #e8e8f0;
+}
+
+#countdown {
+  min-height: 1.4em;
+  font-size: 16px;
+  margin-bottom: 0.25rem;
+  text-align: center;
+  color: #c5c5e0;
+}
+
+.board-label {
+  text-align: center;
+  font-size: 14px;
+  color: #c5c5e0;
+  margin: 0.5rem 0 0.25rem;
+}
+
+/* Disposition globale : etiquettes a-h / 8-1 autour de l'echiquier */
+.board-wrapper {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  grid-template-rows: 1fr 20px;
+  grid-template-areas:
+    "ranks board"
+    ".     files";
+  width: min(380px, 100%);
+  aspect-ratio: 1;
+  margin-bottom: 0.5rem;
+}
+/* Version reduite, utilisee pour l'apercu du style de pieces dans le menu */
+.board-wrapper--preview {
+  width: min(220px, 70%);
+}
+.board {
+  grid-area: board;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  border: 3px solid #3a2a1a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.ranks {
+  grid-area: ranks;
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+}
+.files {
+  grid-area: files;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+}
+.rank-label, .file-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #9a9ac0;
+}
+
+.square {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.15s;
+}
+.light { background-color: #f0d9b5; }
+.dark { background-color: #b58863; }
+.square.correct {
+  box-shadow: inset 0 0 0 4px #43a047;
+}
+.square.incorrect {
+  box-shadow: inset 0 0 0 4px #e53935;
+}
+.square.clickable {
+  cursor: pointer;
+  touch-action: none;
+}
+.square.clickable:hover {
+  box-shadow: inset 0 0 0 3px rgba(0, 229, 255, 0.6);
+}
+
+/* Pieces : images PNG */
+.piece-img {
+  width: 85%;
+  height: 85%;
+  object-fit: contain;
+  pointer-events: none; /* le clic/drag est gere par le parent (case ou reserve) */
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Case ou pion en cours de glissement : on l'estompe */
+.square.dragging,
+.reserve-piece.dragging {
+  opacity: 0.25;
+}
+
+/* Case survolee pendant un glissement */
+.square.drag-over {
+  box-shadow: inset 0 0 0 3px #ffd54f;
+}
+
+/* "Fantome" de la piece qui suit le doigt/curseur pendant le glissement */
+.drag-ghost {
+  position: fixed;
+  width: 48px;
+  height: 48px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.drag-ghost .piece-img {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+
+.reserve {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  min-height: 52px;
+  width: min(380px, 100%);
+  margin-bottom: 0.5rem;
+}
+.reserve-piece {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #3a2a1a;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #ffffff;
+  transition: transform 0.15s, box-shadow 0.2s;
+  touch-action: none;
+}
+.reserve-piece:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.5);
+}
+.reserve-piece.selected {
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, 0.15);
+}
+
+/* Tableau des resultats */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin-top: 0.5rem;
+}
+th, td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 4px;
+  text-align: center;
+}
+th {
+  color: #9a9ac0;
+  font-weight: 600;
+}
+td {
+  color: #e8e8f0;
+}
+tbody tr {
+  transition: background 0.15s;
+}
+tbody tr:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================================
+   ECRAN MODE, BARRE DU HAUT, BOUTONS DE MODE
+   ============================================================ */
+.card-topbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+.back-link--btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e8e8f0;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.icon-btn:hover {
+  border-color: #00e5ff;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+}
+
+.mode-subtitle {
+  color: #c5c5e0;
+  font-size: 14px;
+  text-align: center;
+  margin: 0 0 0.5rem;
+}
+
+.mode-btn {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px 16px;
+  margin-top: 0.25rem;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  color: #e8e8f0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.mode-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(0, 229, 255, 0.5);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35), 0 0 18px rgba(0, 229, 255, 0.2);
+}
+.mode-btn-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+.mode-btn-desc {
+  font-size: 12px;
+  color: #9a9ac0;
+}
+.mode-btn--soon {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ============================================================
+   CONFIGURATION : libelle, grille de difficulte, joueurs
+   ============================================================ */
+.full-width {
+  width: 100%;
+}
+.field-label {
+  width: 100%;
+  font-size: 14px;
+  color: #c5c5e0;
+  font-weight: 600;
+  margin-top: 0.4rem;
+}
+
+.difficulty-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+.difficulty-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #e8e8f0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.difficulty-btn:hover {
+  border-color: rgba(0, 229, 255, 0.5);
+}
+.difficulty-btn.active {
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, 0.12);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+}
+.diff-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+.diff-desc {
+  font-size: 11px;
+  color: #9a9ac0;
+}
+
+.player-name-input {
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   ECRAN PASSAGE (multijoueur local)
+   ============================================================ */
+.pass-icon {
+  font-size: 52px;
+  text-align: center;
+  margin: 0.25rem 0 0.5rem;
+}
+
+/* ============================================================
+   MODALES (parametres + choix des pieces)
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(8, 6, 24, 0.62);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-card {
+  background: rgba(26, 22, 51, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 1.25rem;
+  width: min(420px, 94vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.modal-card--wide {
+  width: min(460px, 94vw);
+}
+.modal-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #e8e8f0;
+}
+.modal-actions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.modal-actions .primary-btn {
+  margin-top: 0;
+  flex: 1;
+}
+.modal-actions .small-btn {
+  flex: 1;
+  padding: 12px;
+}
+
+/* Reglages : lignes avec interrupteur */
+.setting-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #e8e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.setting-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-top: 6px;
+}
+
+/* Interrupteur (toggle) */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 26px;
+  transition: background 0.2s;
+}
+.slider::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.switch input:checked + .slider {
+  background: linear-gradient(90deg, #00b8d4, #7c4dff);
+}
+.switch input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+/* Apercu compact des deux rois (reglages) */
+.kings-preview {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 4px 0 6px;
+}
+.king-cell {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.king-cell .piece-img {
+  width: 80%;
+  height: 80%;
+}
+
+/* Grille de choix des sets de pieces */
+.piece-set-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px;
+}
+.piece-set-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #e8e8f0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: border-color 0.15s, background 0.15s;
+}
+.piece-set-option:hover {
+  border-color: rgba(0, 229, 255, 0.5);
+}
+.piece-set-option.selected {
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, 0.12);
+}
+.piece-set-thumb {
+  display: flex;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 6px;
+  padding: 3px;
+}
+.piece-set-thumb .piece-img {
+  width: 24px;
+  height: 24px;
+}
+.piece-set-name {
+  font-size: 11px;
+  text-align: center;
+}
+
+.ghost-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #c5c5e0;
+}
+.ghost-btn:hover {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================================
+   RESULTATS MULTIJOUEUR : classement + onglets joueurs
+   ============================================================ */
+.leaderboard-table .winner-row td {
+  color: #ffd54f;
+  font-weight: 700;
+}
+#playerTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin: 8px 0;
+}
+.player-tab {
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #e8e8f0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: border-color 0.15s, background 0.15s;
+}
+.player-tab:hover {
+  border-color: rgba(0, 229, 255, 0.5);
+}
+.player-tab.active {
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, 0.12);
+}
+
+/* ============================================================
+   AFFICHAGE DES COORDONNEES (toggle)
+   On garde l'espace reserve pour ne pas decaler l'echiquier.
+   ============================================================ */
+body.hide-coords .ranks,
+body.hide-coords .files {
+  visibility: hidden;
+}
+
+/* ============================================================
+   SURCHARGES THEME CLAIR (composants du jeu)
+   ============================================================ */
+body.light-theme .menu-card,
+body.light-theme .modal-card {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(80, 80, 140, 0.18);
+}
+body.light-theme .menu-card label,
+body.light-theme .field-label,
+body.light-theme .mode-subtitle,
+body.light-theme .board-label,
+body.light-theme #countdown {
+  color: #4a4a66;
+}
+body.light-theme .menu-card input,
+body.light-theme .menu-card select {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #25243a;
+}
+body.light-theme .menu-card select option {
+  background: #ffffff;
+  color: #25243a;
+}
+body.light-theme #roundInfo,
+body.light-theme td,
+body.light-theme .modal-header h2,
+body.light-theme .setting-row,
+body.light-theme .timer-value {
+  color: #25243a;
+}
+body.light-theme th {
+  color: #6a6a8a;
+}
+body.light-theme th, body.light-theme td {
+  border-bottom-color: rgba(0, 0, 0, 0.12);
+}
+body.light-theme .mode-btn,
+body.light-theme .difficulty-btn,
+body.light-theme .piece-set-option,
+body.light-theme .player-tab,
+body.light-theme .icon-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #25243a;
+}
+body.light-theme .mode-btn-desc,
+body.light-theme .diff-desc,
+body.light-theme .back-link {
+  color: #6a6a8a;
+}
+body.light-theme .difficulty-btn.active,
+body.light-theme .piece-set-option.selected,
+body.light-theme .player-tab.active {
+  background: rgba(0, 184, 212, 0.15);
+  border-color: #00b8d4;
+}
+body.light-theme .modal-overlay {
+  background: rgba(40, 40, 70, 0.35);
+}
+body.light-theme .slider {
+  background: rgba(0, 0, 0, 0.2);
+}
+body.light-theme .setting-row {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+body.light-theme tbody tr:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================================
+   MULTIJOUEUR EN LIGNE
+   ============================================================ */
+
+/* Separateur "ou" entre Creer et Rejoindre */
+.online-divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #9a9ac0;
+  font-size: 13px;
+  margin: 2px 0;
+}
+.online-divider::before,
+.online-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Ligne input + bouton Rejoindre */
+.online-join-row {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.salon-code-input {
+  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Message d'erreur lobby */
+.online-error {
+  width: 100%;
+  color: #ff6b6b;
+  font-size: 13px;
+  text-align: center;
+  padding: 6px 0;
+}
+
+/* Bloc code du salon (salle d'attente) */
+.salon-code-display {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 229, 255, 0.07);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+.salon-code-label {
+  font-size: 12px;
+  color: #9a9ac0;
+  white-space: nowrap;
+}
+.salon-code-value {
+  flex: 1;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  color: #00e5ff;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Liste des joueurs en attente */
+.online-players-list {
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.online-player-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+  color: #e8e8f0;
+}
+.host-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #00e5ff;
+  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
+/* ===== Theme clair : surcharges online ===== */
+body.light-theme .salon-code-display {
+  background: rgba(0, 184, 212, 0.08);
+  border-color: rgba(0, 184, 212, 0.25);
+}
+body.light-theme .salon-code-value {
+  color: #00838f;
+}
+body.light-theme .online-player-item {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #25243a;
+}
+body.light-theme .online-divider {
+  color: #9a9ac0;
+}
+body.light-theme .online-divider::before,
+body.light-theme .online-divider::after {
+  background: rgba(0, 0, 0, 0.1);
+}
+body.light-theme .salon-code-label {
+  color: #6a6a8a;
+}

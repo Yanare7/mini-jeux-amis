@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memoire d'echecs</title>
+  <link rel="stylesheet" href="../shared/theme.css">
+  <link rel="stylesheet" href="style.css">
+  <!-- SDK Firebase Realtime Database (compat : syntaxe firebase.database()) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- ECRAN MODE (entree du jeu) -->
+  <div class="screen" id="modeScreen">
+    <div class="menu-card">
+      <div class="card-topbar">
+        <a href="../index.html" class="back-link">&larr; Mini-jeux</a>
+        <button id="settingsBtn" class="icon-btn" title="Parametres" aria-label="Parametres">&#9881;</button>
+      </div>
+      <h1>Memoire d'echecs</h1>
+      <p class="mode-subtitle">Choisis un mode de jeu</p>
+
+      <button id="soloBtn" class="mode-btn">
+        <span class="mode-btn-title">Solo</span>
+        <span class="mode-btn-desc">Joue seul et bats ton record</span>
+      </button>
+
+      <button id="multiLocalBtn" class="mode-btn">
+        <span class="mode-btn-title">Multijoueur local</span>
+        <span class="mode-btn-desc">A tour de role sur le meme appareil</span>
+      </button>
+
+      <button id="multiOnlineBtn" class="mode-btn">
+        <span class="mode-btn-title">Multijoueur en ligne</span>
+        <span class="mode-btn-desc">Jusqu'a 8 joueurs sur leurs appareils</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ECRAN ACCUEIL / CONFIGURATION -->
+  <div class="screen hidden" id="homeScreen">
+    <div class="menu-card">
+      <button type="button" id="setupBackBtn" class="back-link back-link--btn">&larr; Retour</button>
+      <h1 id="setupTitle">Partie solo</h1>
+
+      <!-- Nom (solo) -->
+      <div id="soloNamePanel" class="full-width">
+        <label for="playerName">Ton prenom</label>
+        <input type="text" id="playerName" placeholder="Ton prenom">
+      </div>
+
+      <!-- Joueurs (multi) -->
+      <div id="multiPlayersPanel" class="full-width hidden">
+        <label for="playerCountSelect">Nombre de joueurs</label>
+        <select id="playerCountSelect"></select>
+        <div id="playerNamesPanel"></div>
+      </div>
+
+      <label for="roundsSelect">Nombre de manches</label>
+      <select id="roundsSelect"></select>
+
+      <label for="duration">Duree d'affichage (secondes)</label>
+      <select id="duration"></select>
+
+      <span class="field-label">Difficulte</span>
+      <div class="difficulty-grid" id="difficultyGrid">
+        <button type="button" class="difficulty-btn active" data-difficulty="easy">
+          <span class="diff-title">Facile</span>
+          <span class="diff-desc">2 pieces</span>
+        </button>
+        <button type="button" class="difficulty-btn" data-difficulty="medium">
+          <span class="diff-title">Moyen</span>
+          <span class="diff-desc">6 pieces</span>
+        </button>
+        <button type="button" class="difficulty-btn" data-difficulty="hard">
+          <span class="diff-title">Difficile</span>
+          <span class="diff-desc">9 pieces</span>
+        </button>
+        <button type="button" class="difficulty-btn" data-difficulty="custom">
+          <span class="diff-title">Personnalise</span>
+          <span class="diff-desc">a toi de voir</span>
+        </button>
+      </div>
+
+      <div id="customDifficultyPanel" class="hidden full-width">
+        <div class="checkbox-row">
+          <input type="checkbox" id="samePiecesCheckbox" checked>
+          <label for="samePiecesCheckbox">Meme nombre de pieces a chaque manche</label>
+        </div>
+
+        <div id="samePiecesPanel">
+          <label for="customPiecesInput">Nombre de pieces (1 a 16)</label>
+          <input type="number" id="customPiecesInput" value="4" min="1" max="16">
+        </div>
+
+        <div id="perRoundPiecesPanel" class="hidden"></div>
+      </div>
+
+      <button id="playBtn" class="primary-btn">Commencer</button>
+    </div>
+  </div>
+
+  <!-- ECRAN PASSAGE (multijoueur local) -->
+  <div class="screen hidden" id="passScreen">
+    <div class="menu-card">
+      <h1 id="passTitle">A toi de jouer</h1>
+      <p id="passSubtitle" class="mode-subtitle">Passe l'appareil au joueur suivant</p>
+      <div class="pass-icon">&#9823;</div>
+      <button id="passContinueBtn" class="primary-btn">C'est pret, je commence</button>
+    </div>
+  </div>
+
+  <!-- ECRAN LOBBY ONLINE (entree multijoueur en ligne) -->
+  <div class="screen hidden" id="onlineLobbyScreen">
+    <div class="menu-card">
+      <button type="button" id="onlineBackBtn" class="back-link back-link--btn">&larr; Retour</button>
+      <h1>Multijoueur en ligne</h1>
+      <p class="mode-subtitle">Entre ton prenom puis cree ou rejoins un salon</p>
+
+      <label for="onlinePlayerNameInput">Ton prenom</label>
+      <input type="text" id="onlinePlayerNameInput" placeholder="Ton prenom" autocomplete="off">
+
+      <button id="createSalonBtn" class="primary-btn">Creer un salon</button>
+
+      <div class="online-divider"><span>ou</span></div>
+
+      <div class="online-join-row">
+        <input type="text" id="salonCodeInput" class="salon-code-input"
+               placeholder="Code du salon (ex: AB3X7K)" maxlength="6"
+               autocomplete="off" autocapitalize="characters">
+        <button id="joinSalonBtn" class="small-btn">Rejoindre</button>
+      </div>
+
+      <p id="onlineLobbyError" class="online-error hidden"></p>
+    </div>
+  </div>
+
+  <!-- ECRAN SALLE D'ATTENTE ONLINE -->
+  <div class="screen hidden" id="onlineWaitScreen">
+    <div class="menu-card">
+      <button type="button" id="waitLeaveBtn" class="back-link back-link--btn">&larr; Quitter</button>
+      <h1>Salle d'attente</h1>
+
+      <!-- Code du salon -->
+      <div class="salon-code-display">
+        <span class="salon-code-label">Code du salon</span>
+        <span class="salon-code-value" id="onlineSalonCodeEl">------</span>
+        <button type="button" id="copySalonCodeBtn" class="small-btn">Copier</button>
+      </div>
+
+      <span class="field-label">Joueurs connectes</span>
+      <ul id="onlinePlayersList" class="online-players-list"></ul>
+
+      <!-- Panneau config : visible seulement pour l'hote -->
+      <div id="onlineConfigPanel" class="hidden full-width">
+        <span class="field-label">Parametres de la partie</span>
+
+        <label for="onlineRoundsSelect">Nombre de manches</label>
+        <select id="onlineRoundsSelect"></select>
+
+        <label for="onlineDurationSelect">Duree d'affichage (secondes)</label>
+        <select id="onlineDurationSelect"></select>
+
+        <span class="field-label">Difficulte</span>
+        <div class="difficulty-grid" id="onlineDifficultyGrid">
+          <button type="button" class="difficulty-btn active" data-difficulty="easy">
+            <span class="diff-title">Facile</span>
+            <span class="diff-desc">2 pieces</span>
+          </button>
+          <button type="button" class="difficulty-btn" data-difficulty="medium">
+            <span class="diff-title">Moyen</span>
+            <span class="diff-desc">6 pieces</span>
+          </button>
+          <button type="button" class="difficulty-btn" data-difficulty="hard">
+            <span class="diff-title">Difficile</span>
+            <span class="diff-desc">9 pieces</span>
+          </button>
+          <button type="button" class="difficulty-btn" data-difficulty="custom">
+            <span class="diff-title">Perso</span>
+            <span class="diff-desc">4 pieces</span>
+          </button>
+        </div>
+      </div>
+
+      <button id="onlineStartBtn" class="primary-btn hidden" disabled>En attente...</button>
+      <p id="onlineWaitMsg" class="mode-subtitle">En attente que l'hote demarre la partie...</p>
+    </div>
+  </div>
+
+  <!-- ECRAN ATTENTE FIN (apres que le joueur local ait fini) -->
+  <div class="screen hidden" id="onlineFinishedScreen">
+    <div class="menu-card">
+      <h1>Bien joué !</h1>
+      <p class="mode-subtitle">En attente des autres joueurs...</p>
+      <div class="pass-icon">&#8987;</div>
+      <p id="onlineFinishedCount" class="mode-subtitle"></p>
+    </div>
+  </div>
+
+  <!-- ECRAN JEU -->
+  <div class="screen hidden" id="gameScreen">
+    <div class="menu-card">
+      <p id="roundInfo" class="hidden"></p>
+
+      <div class="controls hidden" id="nextRoundControls">
+        <button id="nextRoundBtn" class="primary-btn">Manche suivante</button>
+      </div>
+
+      <div class="controls hidden" id="checkControls">
+        <button id="checkBtn" class="primary-btn">Verifier</button>
+      </div>
+
+      <div class="timer hidden" id="timer">
+        <svg viewBox="0 0 100 100">
+          <circle class="timer-track" cx="50" cy="50" r="42"></circle>
+          <circle class="timer-progress" id="timerProgress" cx="50" cy="50" r="42"></circle>
+        </svg>
+        <span class="timer-value" id="timerValue"></span>
+      </div>
+
+      <p id="countdown"></p>
+
+      <div class="board-wrapper">
+        <div class="ranks" id="ranks"></div>
+        <div class="board" id="board"></div>
+        <div class="files" id="files"></div>
+      </div>
+
+      <div id="reserve" class="reserve"></div>
+
+      <div id="solutionSection" class="hidden">
+        <p class="board-label">Solution</p>
+        <div class="board-wrapper">
+          <div class="ranks" id="solutionRanks"></div>
+          <div class="board" id="solutionBoard"></div>
+          <div class="files" id="solutionFiles"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ECRAN RESULTATS -->
+  <div class="screen hidden" id="resultsScreen">
+    <div class="menu-card">
+      <h1 id="resultsTitle">Resultats</h1>
+      <p id="finalScore"></p>
+
+      <!-- Classement (multijoueur) -->
+      <div id="leaderboardSection" class="hidden full-width"></div>
+
+      <!-- Selecteur de joueur (multijoueur) -->
+      <div id="playerTabs" class="hidden full-width"></div>
+
+      <table id="resultsTable">
+        <thead>
+          <tr><th>Manche</th><th>Score</th><th></th></tr>
+        </thead>
+        <tbody id="resultsTableBody"></tbody>
+      </table>
+
+      <div id="reviewSection" class="hidden">
+        <p class="board-label" id="reviewLabel"></p>
+        <div class="board-wrapper">
+          <div class="ranks" id="reviewRanks"></div>
+          <div class="board" id="reviewBoard"></div>
+          <div class="files" id="reviewFiles"></div>
+        </div>
+        <p class="board-label">Solution</p>
+        <div class="board-wrapper">
+          <div class="ranks" id="reviewSolutionRanks"></div>
+          <div class="board" id="reviewSolutionBoard"></div>
+          <div class="files" id="reviewSolutionFiles"></div>
+        </div>
+      </div>
+
+      <button id="homeBtn" class="primary-btn">Retour a l'accueil</button>
+    </div>
+  </div>
+
+  <!-- MODALE PARAMETRES -->
+  <div class="modal-overlay hidden" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Parametres</h2>
+        <button id="settingsCloseBtn" class="icon-btn" aria-label="Fermer">&#10005;</button>
+      </div>
+
+      <div class="setting-row">
+        <span>Theme clair</span>
+        <label class="switch">
+          <input type="checkbox" id="themeToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <span>Afficher les coordonnees</span>
+        <label class="switch">
+          <input type="checkbox" id="coordsToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-block">
+        <span class="field-label">Style des pieces</span>
+        <div class="kings-preview" id="kingsPreview"></div>
+        <button type="button" id="openPiecePickerBtn" class="small-btn">Changer les pieces</button>
+      </div>
+
+      <button type="button" id="settingsDoneBtn" class="primary-btn">Fermer</button>
+    </div>
+  </div>
+
+  <!-- MODALE CHOIX DES PIECES -->
+  <div class="modal-overlay hidden" id="pieceModal">
+    <div class="modal-card modal-card--wide">
+      <div class="modal-header">
+        <h2>Choix des pieces</h2>
+        <button id="pieceCloseBtn" class="icon-btn" aria-label="Fermer">&#10005;</button>
+      </div>
+
+      <p class="board-label" id="pieceModalSetName"></p>
+      <div class="board-wrapper board-wrapper--preview">
+        <div class="ranks" id="pieceSetPreviewRanks"></div>
+        <div class="board" id="pieceSetPreviewBoard"></div>
+        <div class="files" id="pieceSetPreviewFiles"></div>
+      </div>
+
+      <div class="piece-set-grid" id="pieceSetGrid"></div>
+
+      <div class="modal-actions">
+        <button type="button" id="pieceCancelBtn" class="small-btn ghost-btn">Annuler</button>
+        <button type="button" id="pieceValidateBtn" class="primary-btn">Valider</button>
+      </div>
+    </div>
+  </div>
+
+  <!--
+    Ordre de chargement important : les scripts suivants partagent
+    le meme espace global, comme s'ils etaient colles les uns aux
+    autres dans cet ordre. config/state/logic/dom doivent venir
+    avant les fichiers qui les utilisent, et main.js doit venir
+    en dernier (initialisation).
+  -->
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/logic.js"></script>
+  <script src="js/dom.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/dragdrop.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/online.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/results.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

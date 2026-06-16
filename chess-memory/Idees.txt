@@ -1,0 +1,3 @@
+Choisir mode toutes les pieces ou uniquements les pieces du plateau. 
+La mise en page 
+Choisir des plateaux
