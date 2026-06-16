@@ -6,6 +6,7 @@
   <title>Mini-jeux entre amis</title>
   <link rel="stylesheet" href="shared/theme.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
 
@@ -14,8 +15,13 @@
   <div class="orb orb-3"></div>
 
   <div class="page">
-    <h1>Mini-jeux entre amis</h1>
+    <div class="home-topbar">
+      <h1>Mini-jeux entre amis</h1>
+      <button id="homeSettingsBtn" class="home-icon-btn" title="Parametres" aria-label="Parametres">&#9881;</button>
+    </div>
     <p class="subtitle">Choisis un jeu pour commencer</p>
+
+    <button id="salonBtn" class="home-salon-btn">&#127942; Salon multijoueur</button>
 
     <div class="games-grid">
 
@@ -29,9 +35,207 @@
         <div class="game-title">Bientot disponible</div>
       </div>
 
-
     </div>
   </div>
+
+  <!-- MODALE SALON -->
+  <div class="home-modal-overlay hidden" id="salonModal">
+    <div class="home-modal-card">
+      <div class="home-modal-header">
+        <h2>Salon multijoueur</h2>
+        <button id="salonModalCloseBtn" class="home-icon-btn" aria-label="Fermer">&#10005;</button>
+      </div>
+
+      <!-- Etape 1 : creer ou rejoindre -->
+      <div id="salonStep1">
+        <button id="showCreateBtn" class="home-mode-btn">
+          <span class="home-mode-btn-title">Creer un salon</span>
+          <span class="home-mode-btn-desc">Lance une session et invite tes amis</span>
+        </button>
+        <div class="home-online-divider"><span>ou</span></div>
+        <button id="showJoinBtn" class="home-mode-btn">
+          <span class="home-mode-btn-title">Rejoindre un salon</span>
+          <span class="home-mode-btn-desc">Entre le code donne par le createur</span>
+        </button>
+      </div>
+
+      <!-- Etape 2a : creer -->
+      <div id="salonCreateStep" class="hidden">
+        <button type="button" id="createBackBtn" class="home-back-btn">&larr; Retour</button>
+        <label class="home-label" for="createNameInput">Ton prenom</label>
+        <input type="text" id="createNameInput" class="home-input" placeholder="Ton prenom" autocomplete="off">
+        <span class="home-field-label">Choix du jeu</span>
+        <div class="home-game-choice">
+          <div class="home-game-choice-item">&#9822; Memoire d'echecs</div>
+        </div>
+        <button id="doCreateBtn" class="home-primary-btn">Creer le salon</button>
+        <p id="createError" class="home-error hidden"></p>
+      </div>
+
+      <!-- Etape 2b : rejoindre -->
+      <div id="salonJoinStep" class="hidden">
+        <button type="button" id="joinBackBtn" class="home-back-btn">&larr; Retour</button>
+        <label class="home-label" for="joinNameInput">Ton prenom</label>
+        <input type="text" id="joinNameInput" class="home-input" placeholder="Ton prenom" autocomplete="off">
+        <label class="home-label" for="joinCodeInput">Code du salon</label>
+        <input type="text" id="joinCodeInput" class="home-input home-code-input"
+               placeholder="AB3X7K" maxlength="6"
+               autocomplete="off" autocapitalize="characters">
+        <button id="doJoinBtn" class="home-primary-btn">Rejoindre</button>
+        <p id="joinError" class="home-error hidden"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE PARAMETRES -->
+  <div class="home-modal-overlay hidden" id="homeSettingsModal">
+    <div class="home-modal-card">
+      <div class="home-modal-header">
+        <h2>Parametres</h2>
+        <button id="homeSettingsCloseBtn" class="home-icon-btn" aria-label="Fermer">&#10005;</button>
+      </div>
+
+      <div class="home-setting-row">
+        <span>Theme clair</span>
+        <label class="home-switch">
+          <input type="checkbox" id="homeThemeToggle">
+          <span class="home-slider"></span>
+        </label>
+      </div>
+
+      <div class="home-modal-actions">
+        <button id="homeSettingsQuitBtn" class="home-small-btn home-ghost-btn">Quitter</button>
+        <button id="homeSettingsSaveBtn" class="home-primary-btn">Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // THEME GLOBAL
+    // ============================================================
+    var currentTheme = 'dark';
+
+    function loadGlobalTheme() {
+      try {
+        var prefs = JSON.parse(localStorage.getItem('chessMemoryPreferences') || '{}');
+        return prefs.theme || 'dark';
+      } catch(e) { return 'dark'; }
+    }
+
+    function applyGlobalTheme(t) {
+      document.body.classList.toggle('light-theme', t === 'light');
+    }
+
+    currentTheme = loadGlobalTheme();
+    applyGlobalTheme(currentTheme);
+
+    // ============================================================
+    // MODALE PARAMETRES
+    // ============================================================
+    document.getElementById('homeSettingsBtn').addEventListener('click', function() {
+      document.getElementById('homeThemeToggle').checked = (currentTheme === 'light');
+      document.getElementById('homeSettingsModal').classList.remove('hidden');
+    });
+
+    function closeHomeSettings() {
+      document.getElementById('homeSettingsModal').classList.add('hidden');
+    }
+
+    document.getElementById('homeSettingsCloseBtn').addEventListener('click', closeHomeSettings);
+    document.getElementById('homeSettingsQuitBtn').addEventListener('click', closeHomeSettings);
+    document.getElementById('homeSettingsModal').addEventListener('click', function(e) {
+      if (e.target === document.getElementById('homeSettingsModal')) closeHomeSettings();
+    });
+
+    document.getElementById('homeSettingsSaveBtn').addEventListener('click', function() {
+      currentTheme = document.getElementById('homeThemeToggle').checked ? 'light' : 'dark';
+      applyGlobalTheme(currentTheme);
+      // Enregistre dans la cle partagee avec chess-memory
+      try {
+        var prefs = JSON.parse(localStorage.getItem('chessMemoryPreferences') || '{}');
+        prefs.theme = currentTheme;
+        localStorage.setItem('chessMemoryPreferences', JSON.stringify(prefs));
+      } catch(e) {}
+      closeHomeSettings();
+    });
+
+    // ============================================================
+    // MODALE SALON
+    // ============================================================
+    function showSalonPanel(showId, hideId1, hideId2) {
+      document.getElementById(showId).classList.remove('hidden');
+      document.getElementById(hideId1).classList.add('hidden');
+      document.getElementById(hideId2).classList.add('hidden');
+    }
+
+    document.getElementById('salonBtn').addEventListener('click', function() {
+      showSalonPanel('salonStep1', 'salonCreateStep', 'salonJoinStep');
+      document.getElementById('salonModal').classList.remove('hidden');
+    });
+
+    document.getElementById('salonModalCloseBtn').addEventListener('click', function() {
+      document.getElementById('salonModal').classList.add('hidden');
+    });
+    document.getElementById('salonModal').addEventListener('click', function(e) {
+      if (e.target === document.getElementById('salonModal'))
+        document.getElementById('salonModal').classList.add('hidden');
+    });
+
+    document.getElementById('showCreateBtn').addEventListener('click', function() {
+      showSalonPanel('salonCreateStep', 'salonStep1', 'salonJoinStep');
+    });
+    document.getElementById('showJoinBtn').addEventListener('click', function() {
+      showSalonPanel('salonJoinStep', 'salonStep1', 'salonCreateStep');
+    });
+    document.getElementById('createBackBtn').addEventListener('click', function() {
+      showSalonPanel('salonStep1', 'salonCreateStep', 'salonJoinStep');
+    });
+    document.getElementById('joinBackBtn').addEventListener('click', function() {
+      showSalonPanel('salonStep1', 'salonJoinStep', 'salonCreateStep');
+    });
+
+    document.getElementById('doCreateBtn').addEventListener('click', function() {
+      var name = document.getElementById('createNameInput').value.trim();
+      var err = document.getElementById('createError');
+      if (!name) {
+        err.textContent = 'Entre ton prenom.';
+        err.classList.remove('hidden');
+        return;
+      }
+      err.classList.add('hidden');
+      sessionStorage.setItem('pendingPlayerName', name);
+      sessionStorage.setItem('pendingOnlineAction', 'create');
+      window.location.href = 'chess-memory/index.html';
+    });
+
+    document.getElementById('doJoinBtn').addEventListener('click', function() {
+      var name = document.getElementById('joinNameInput').value.trim();
+      var code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+      var err = document.getElementById('joinError');
+      if (!name) {
+        err.textContent = 'Entre ton prenom.';
+        err.classList.remove('hidden');
+        return;
+      }
+      if (!code || code.length !== 6) {
+        err.textContent = 'Entre un code a 6 caracteres.';
+        err.classList.remove('hidden');
+        return;
+      }
+      err.classList.add('hidden');
+      sessionStorage.setItem('pendingPlayerName', name);
+      sessionStorage.setItem('pendingOnlineSalonCode', code);
+      window.location.href = 'chess-memory/index.html';
+    });
+
+    document.getElementById('createNameInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('doCreateBtn').click();
+    });
+    document.getElementById('joinCodeInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('doJoinBtn').click();
+    });
+  </script>
 
 </body>
 </html>
