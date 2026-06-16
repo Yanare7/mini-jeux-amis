@@ -221,8 +221,23 @@
             </button>
             <button type="button" class="difficulty-btn" data-difficulty="custom">
               <span class="diff-title">Perso</span>
-              <span class="diff-desc">4 pieces</span>
+              <span class="diff-desc">a toi de voir</span>
             </button>
+          </div>
+
+          <div id="salonCustomDifficultyPanel" class="hidden full-width">
+            <div class="setting-row setting-row--compact">
+              <span>Meme nombre de pieces par manche</span>
+              <label class="switch">
+                <input type="checkbox" id="salonSamePiecesCheckbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div id="salonSamePiecesPanel">
+              <label for="salonCustomPiecesInput">Nombre de pieces (1 a 16)</label>
+              <input type="number" id="salonCustomPiecesInput" value="4" min="1" max="16">
+            </div>
+            <div id="salonPerRoundPiecesPanel" class="hidden"></div>
           </div>
         </div>
 
